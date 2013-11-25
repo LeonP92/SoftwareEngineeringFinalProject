@@ -1,6 +1,6 @@
 HEADERS += \
-    client.h \
-    email.h
+    email.h \
+    client.h
 
 SOURCES += \
     client.cpp \
