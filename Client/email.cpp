@@ -24,7 +24,7 @@ Email::~Email()
 /// sets the m_to member variable
 void Email::setTo(QString to)
 {
-
+    m_to = to;
 }
 
 ///
@@ -33,7 +33,7 @@ void Email::setTo(QString to)
 /// set m_from
 void Email::setFrom(QString from)
 {
-
+    m_from = from;
 }
 
 ///
@@ -42,7 +42,7 @@ void Email::setFrom(QString from)
 /// set m_subject
 void Email::setSubject(QString subject)
 {
-
+    m_subject = subject;
 }
 
 ///
@@ -51,7 +51,7 @@ void Email::setSubject(QString subject)
 /// set m_subject
 void Email::setMessage(QString message)
 {
-
+    m_message = message;
 }
 
 ///
@@ -60,7 +60,7 @@ void Email::setMessage(QString message)
 /// set m_read
 void Email::setRead(bool read)
 {
-
+    m_read = read;
 }
 
 ///
@@ -69,7 +69,7 @@ void Email::setRead(bool read)
 /// set m_id
 void Email::setID(int id)
 {
-
+    m_id = id;
 }
 
 ///
@@ -78,7 +78,7 @@ void Email::setID(int id)
 /// returns m_subject
 QString Email::getSubject()
 {
-
+    return m_subject;
 }
 
 ///
@@ -87,7 +87,7 @@ QString Email::getSubject()
 /// return m_to
 QString Email::getTo()
 {
-
+    return m_to;
 }
 
 ///
@@ -96,7 +96,7 @@ QString Email::getTo()
 /// return m_from
 QString Email::getFrom()
 {
-
+    return m_from;
 }
 
 ///
@@ -105,5 +105,5 @@ QString Email::getFrom()
 /// return m_message
 QString Email::getMessage()
 {
-
+    return m_message;
 }

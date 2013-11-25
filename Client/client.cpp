@@ -40,7 +40,7 @@ Client::Client(QWidget *parent)
 
     // initial button settings
     m_connectBtn->setDefault(true);
-    m_loginBtn->setEnabled(false);
+    //m_loginBtn->setEnabled(false);
     m_registerBtn->setEnabled(false);
 
     // button box
@@ -59,18 +59,18 @@ Client::Client(QWidget *parent)
                 this, SLOT(displayError(QAbstractSocket::SocketError)));
 
     // put widgets on a window
-    QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(m_hostLabel, 0, 0);
-    mainLayout->addWidget(m_hostEdit, 0, 1);
-    mainLayout->addWidget(m_portLabel, 1, 0);
-    mainLayout->addWidget(m_portEdit, 1, 1);
-    mainLayout->addWidget(m_userLabel, 2, 0);
-    mainLayout->addWidget(m_userEdit, 2, 1);
-    mainLayout->addWidget(m_passwordLabel, 3, 0);
-    mainLayout->addWidget(m_passwordEdit, 3, 1);
-    mainLayout->addWidget(m_loginStatusLabel, 4, 0, 1, 2);
-    mainLayout->addWidget(buttonBox, 5, 0, 1, 2);
-    setLayout(mainLayout);
+    QGridLayout *loginLayout = new QGridLayout;
+    loginLayout->addWidget(m_hostLabel, 0, 0);
+    loginLayout->addWidget(m_hostEdit, 0, 1);
+    loginLayout->addWidget(m_portLabel, 1, 0);
+    loginLayout->addWidget(m_portEdit, 1, 1);
+    loginLayout->addWidget(m_userLabel, 2, 0);
+    loginLayout->addWidget(m_userEdit, 2, 1);
+    loginLayout->addWidget(m_passwordLabel, 3, 0);
+    loginLayout->addWidget(m_passwordEdit, 3, 1);
+    loginLayout->addWidget(m_loginStatusLabel, 4, 0, 1, 2);
+    loginLayout->addWidget(buttonBox, 5, 0, 1, 2);
+    setLayout(loginLayout);
 }
 
 ///
@@ -108,10 +108,37 @@ void Client::registerUser()
 ///
 /// \brief Client::login
 /// sends the server the login information.
-/// If valid, loads the inbox screen.
 void Client::login()
 {
+    m_user = m_userEdit->text();
+    m_password = m_passwordEdit->text();
 
+    // send data to server for login
+    loadMainUI();
+}
+
+///
+/// \brief Client::loadMainUI
+/// loads the main UI that displayes the inbox and message fields
+void Client::loadMainUI()
+{
+    m_toFromLabel = new QLabel(tr("To:"));
+    m_subjectLabel = new QLabel(tr("Subject:"));
+    m_statusLabel = new QLabel(tr("Viewing current inbox."));
+    m_inbox = new QListView;
+
+
+    QListWidget * listWidget = new QListWidget();
+    listWidget->setStyleSheet("QListWidget::item{border-bottom:1px solid black;}");
+    for (int i=0; i<10; i++) {
+        Email * item = new Email();
+        item->setText("Test email "+QString::number(i));
+        item->setSizeHint(QSize(50, 40));
+        listWidget->addItem(item);
+
+    }
+
+    listWidget->show();
 }
 
 ///
@@ -179,6 +206,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 /// reads the data the server has pushed to hte tcpsocket
 void Client::readServerResponse()
 {
+    // if server says login successfull, load new UI
 
 }
 

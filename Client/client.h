@@ -31,6 +31,7 @@ class Client : public QDialog
 
 public:
     Client(QWidget *parent = 0);
+    void loadMainUI();
 
 protected slots:
     //Login window
@@ -84,6 +85,8 @@ private:
     QList <Email*> m_emails;
     QList <Email*> m_sentMail;
 
+    QString m_user;
+    QString m_password;
     QTcpSocket *m_tcpSocket;
     quint16 m_blockSize;
 

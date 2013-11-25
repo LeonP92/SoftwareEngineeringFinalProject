@@ -1,16 +1,16 @@
 #ifndef EMAIL_H
 #define EMAIL_H
 
-#include <QAbstractButton>
+#include <QListWidgetItem>
 
-class Email : public QAbstractButton
+class Email : public QListWidgetItem
 {
-    Q_OBJECT
+    //Q_OBJECT
 
 public:
     Email(QWidget *parent = 0);
     ~Email();
-    void setTo(QStirng to);
+    void setTo(QString to);
     void setFrom(QString from);
     void setSubject(QString subject);
     void setMessage(QString message);
