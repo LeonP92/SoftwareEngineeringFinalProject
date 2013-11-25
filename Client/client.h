@@ -56,16 +56,16 @@ private:
     //Login window variables
     QLabel *m_userLabel;
     QLabel *m_passwordLabel;
-    QLabel *m_addressLabel;
+    QLabel *m_hostLabel;
     QLabel *m_portLabel;
     QLabel *m_loginStatusLabel;
-    QLineEdit *m_addressEdit;
+    QLineEdit *m_hostEdit;
     QLineEdit *m_portEdit;
     QLineEdit *m_userEdit;
     QLineEdit *m_passwordEdit;
-    QPushButton *m_register;
-    QPushButton *m_login;
-    QPushButton *m_connect;
+    QPushButton *m_registerBtn;
+    QPushButton *m_loginBtn;
+    QPushButton *m_connectBtn;
 
     //Main client view varibales
     QLabel *m_currentUser;
@@ -84,7 +84,7 @@ private:
     QList <Email*> m_emails;
     QList <Email*> m_sentMail;
 
-    QTcpSocket *tcpSocket;
+    QTcpSocket *m_tcpSocket;
     quint16 m_blockSize;
 
     QNetworkSession *networkSession;
