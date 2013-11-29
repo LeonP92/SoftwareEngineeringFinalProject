@@ -39,7 +39,35 @@ ClientHandler::ClientHandler(QTcpServer *server, int clientNumber)
 /// of the rest.
 void ClientHandler::readClientData()
 {
+    // Reads data sent from the client
+    bool isSending = false;
 
+    QDataStream inData(m_clientConnection);
+    inData.setVersion(QDataStream::Qt_4_0);
+
+    if (m_blockSize == 0 ){
+        // If there is no data, don't do do anything
+        if ( m_clientConnection->bytesAvailable() < (int)sizeof(quint16))
+            isSending = false;
+        else
+            isSending = true;
+        inData >> m_blockSize;
+
+    }
+
+    // Once again if there are no data, don't do anything
+    if (m_clientConnection->bytesAvailable() < m_blockSize)
+        isSending = false;
+    else
+        isSending = true;
+
+    // It will only get to this part if the socket has data to be read
+    if ( isSending == true){
+        QString clientCommand;
+        inData >> clientCommand;
+        // Analyze Command will decipher what the command wants the server to do
+        analyzeCommand(clientCommand);
+    }
 }
 
 ///
@@ -50,7 +78,20 @@ void ClientHandler::readClientData()
 /// respond to its client.
 void ClientHandler::sendDataToClient(QString response)
 {
+    QStringList responseList = response.split(" {:} ");
 
+    // Will only send data if it is the handler that's trying to respond to its client
+    if (responseList[0].toInt() == m_clientNumber){
+        // Writes the server response so the client can retrieve it
+        QByteArray dataBlock;
+        QDataStream outputStream(&dataBlock, QIODevice::WriteOnly);
+        outputStream.setVersion(QDataStream::Qt_4_0);
+        outputStream << (quint16)0;
+        outputStream << response;
+        outputStream.device()->seek(0);
+        outputStream << (quint16)(dataBlock.size() - sizeof(quint16));
+        m_clientConnection->write(dataBlock);
+    }
 }
 
 ///
@@ -62,7 +103,7 @@ void ClientHandler::sendDataToClient(QString response)
 /// get the server to perform the correct operations.
 void ClientHandler::analyzeCommand(QString command)
 {
-
+    QStringList commandList = command.split(" {:} ");
 }
 
 ///
@@ -72,5 +113,9 @@ void ClientHandler::analyzeCommand(QString command)
 /// and clean up any pointer member variables.
 ClientHandler::~ClientHandler()
 {
+    m_clientConnection->close();
+    delete m_clientConnection;
+    m_clientConnection = NULL;
+
     emit endClientConnection(m_clientNumber);
 }
