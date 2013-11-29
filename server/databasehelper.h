@@ -23,6 +23,7 @@ public:
                            QMap<int, MailMessage *> mailMap);
     bool deleteFromTable(int messageID);
     bool insertIntoTable(QString tableName, QString insertInfo);
+    int getMailId(QString fromUser, QString toUser, QString subject, QString message);
 
 protected:
     bool getInitialized();

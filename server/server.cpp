@@ -250,6 +250,13 @@ void Server::sendEmail(int clientNumber, QString fromUser, QString toUser,
         serverReply = QString::number(clientNumber) + " {:} SUCCESS {:} The mail sent to "
                 + toUser + " was successfully sent!";
         qDebug() << "Success: Inserting mail into the database was successful! ";
+
+        // Need to get the new mail's id and add it to the map of mail
+        int newMailId = m_databaseHelper->getMailId(fromUser, toUser, subject, message);
+        MailMessage *newMailMessage = new MailMessage(newMailId, fromUser, toUser, subject,
+                                                      message, false);
+        m_mapOfMailMessages.insert(newMailId, newMailMessage);
+
     }else{
         serverReply = QString::number(clientNumber) + " {:} ERROR {:} The mail sent to "
                 + toUser + " could not be sent due to an error!";

@@ -104,6 +104,52 @@ void ClientHandler::sendDataToClient(QString response)
 void ClientHandler::analyzeCommand(QString command)
 {
     QStringList commandList = command.split(" {:} ");
+
+    // Command {:} NewUserId {:} UserEncryptedPassword
+    if ( commandList[0].toUpper() == "NEWUSER"){
+        QString newUser = commandList[1];
+        QString encryptedPassword = commandList[2];
+
+        emit newUserCreated(m_clientNumber, newUser, encryptedPassword);
+
+    // Command {:} UserId {:} UserEncryptedPassword
+    }else if (commandList[0].toUpper() == "USERLOGIN"){
+        QString userId = commandList[1];
+        QString encryptedPassword = commandList[2];
+
+        emit userLoginAttempt(m_clientNumber, userId, encryptedPassword);
+
+    // Command {:} UserId
+    }else if (commandList[0].toUpper() == "GETINBOX"){
+        QString userId = commandList[1];
+
+        emit userInboxRequest(m_clientNumber, userId);
+
+    // Command {:} UserId
+    }else if (commandList[0].toUpper() == "GETSENT"){
+        QString userId = commandList[1];
+
+        emit userSentMailRequest(m_clientNumber, userId);
+
+    // Command {:} MailId
+    }else if (commandList[0].toUpper() == "DELETEMAIL"){
+        int mailId = commandList[1].toInt();
+
+        emit deleteEmailCommand(m_clientNumber, mailId);
+
+    // Command {:} FromUser {:} ToUser {:} Subject {:} Message
+    }else if (commandList[0].toUpper() == "SENDMAIL"){
+        QString fromUser = commandList[1];
+        QString toUser = commandList[2];
+        QString subject = commandList[3];
+        QString message = commandList[4];
+
+        emit mailSentCommand(m_clientNumber, fromUser, toUser, subject, message);
+
+    // Should never hit this statement.
+    }else {
+        qDebug() << "ERROR: Unexpected error invalid command: " + commandList[0];
+    }
 }
 
 ///

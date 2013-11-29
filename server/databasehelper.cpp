@@ -82,7 +82,7 @@ void DatabaseHelper::init()
 void DatabaseHelper::serverStartupLoad(QMap<int, QString> userMap,
                                        QMap<int, MailMessage *> mailMap)
 {
-    Q_ASSERT(m_isInitialized);
+    Q_ASSERT(getInitialized());
 }
 
 ///
@@ -93,7 +93,7 @@ void DatabaseHelper::serverStartupLoad(QMap<int, QString> userMap,
 /// Will delete a message from the database.
 bool DatabaseHelper::deleteFromTable(int messageID)
 {
-    Q_ASSERT(m_isInitialized);
+    Q_ASSERT(getInitialized());
 
     QSqlQuery sqlQuery;
 
@@ -117,7 +117,7 @@ bool DatabaseHelper::deleteFromTable(int messageID)
 /// will be done elsewhere.
 bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 {
-    Q_ASSERT(m_isInitialized);
+    Q_ASSERT(getInitialized());
 
     if (tableName == "user"){
 
@@ -128,13 +128,25 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 }
 
 ///
+/// \brief DatabaseHelper::getMailId
+/// \param fromUser
+/// \param toUser
+/// \param subject
+/// \param message
+/// \return
+///
+int DatabaseHelper::getMailId(QString fromUser, QString toUser, QString subject, QString message)
+{
+}
+
+///
 /// \brief DatabaseHelper::getInitialized
 /// \return Returns is intialized
 ///
 /// Used to make sure that the database helper has been initialized before use
 bool DatabaseHelper::getInitialized()
 {
-
+    return m_isInitialized;
 }
 
 ///
