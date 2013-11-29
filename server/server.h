@@ -45,7 +45,7 @@ private:
     QMap<int, QThread *> m_mapOfThreads;
     QMap<int, clientHandlerPointer> m_mapOfClientConnections;
     QMap<int, MailMessage *> m_mapOfMailMessages;
-    QMap<QString, QString> m_listOfUsers;
+    QMap<QString, QString> m_mapOfUsers;
 
     DatabaseHelper *m_databaseHelper;
 

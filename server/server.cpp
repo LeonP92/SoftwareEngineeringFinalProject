@@ -165,6 +165,11 @@ void Server::handleClientRequest()
 /// resources used by the client.
 void Server::cleanUp(int clientNumber)
 {
+    qDebug() << "A connection and thread with the client number, " +
+                QString("%1").arg(clientNumber) + ", has been deleted.";
+
+    m_mapOfClientConnections.take(clientNumber);
+    m_mapOfThreads.take(clientNumber);
 
 }
 
@@ -177,7 +182,27 @@ void Server::cleanUp(int clientNumber)
 /// in order to add the user to the table.
 void Server::newUserRegistration(int clientNumber, QString userName, QString password)
 {
+    QString serverReply;
 
+    if (!m_mapOfUsers.contains(userName.toUpper())){
+        QString information = userName + " {:} " + password;
+        if (m_databaseHelper->insertIntoTable("user", information)){
+            qDebug() << "Inserting new user was a success!";
+
+            serverReply = QString::number(clientNumber) +
+                    " {:} SUCCESS {:} New user, " + userName + ", was created sucessfully!";
+        }else{
+            qDebug() << "Error inserting the new user!";
+
+            serverReply = QString::number(clientNumber) +
+                    " {:} ERROR {:} New user, " + userName + ", was failed to be created!";
+        }
+    }else{
+        serverReply = QString::number(clientNumber) +
+                " {:} ERROR {:} The username " + userName + " already exists.";
+    }
+
+    emit serverResponse(serverReply);
 }
 
 ///
@@ -190,6 +215,20 @@ void Server::newUserRegistration(int clientNumber, QString userName, QString pas
 void Server::validateUserAccount(int clientNumber, QString userName, QString password)
 {
     QString serverReply;
+    if ( m_mapOfUsers.contains(userName.toUpper()) ){
+        if (m_mapOfUsers[userName.toUpper()] == password){
+            qDebug() << "User authentication is successful!";
+            serverReply = QString::number(clientNumber) +
+                    " {:} SUCCESS {:} Success! Welcome back " + userName + "!";
+        }else{
+            qDebug() << QString::number(clientNumber) +
+                        " {:} ERROR {:} The username and password combination was incorrect!";
+        }
+    }else{
+        serverReply = QString::number(clientNumber) + " {:} ERROR {:} Invalid username.";
+    }
+
+    emit serverResponse(serverReply);
 }
 
 ///
@@ -208,7 +247,7 @@ void Server::sendEmail(int clientNumber, QString fromUser, QString toUser,
     QString insertInformation = fromUser + " {:} " + toUser + " {:} " +
                                 subject + " {:} " + message;
     if (m_databaseHelper->insertIntoTable("mail", insertInformation)){
-        serverReply = QString::number(clientNumber) + " {:} SENT {:} The mail sent to "
+        serverReply = QString::number(clientNumber) + " {:} SUCCESS {:} The mail sent to "
                 + toUser + " was successfully sent!";
         qDebug() << "Success: Inserting mail into the database was successful! ";
     }else{
@@ -228,12 +267,22 @@ void Server::sendEmail(int clientNumber, QString fromUser, QString toUser,
 /// updates.
 void Server::deleteEmail(int clientNumber, int id)
 {
+    QString serverReply;
+
     if (m_databaseHelper->deleteFromTable(id)){
         MailMessage *emailToDelete = m_mapOfMailMessages[id];
         qDebug() << "Email with the subject: " + emailToDelete->getEmailSubject();
+
+        serverReply = QString::number(clientNumber) +
+                " {:} SUCCESS {:} Email Successfully deleted!";
     }else{
         qDebug() << "Unexpected Error: Email couldn't be deleted.";
+
+        serverReply = QString::number(clientNumber) +
+                " {:} ERROR {:} Email could not be deleted!";
     }
+
+    emit serverResponse(serverReply);
 }
 
 ///
