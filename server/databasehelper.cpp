@@ -70,19 +70,27 @@ void DatabaseHelper::init()
 }
 
 ///
-/// \brief DatabaseHelper::serverStartupLoad
-/// \param userMap
-/// \param mailMap
+/// \brief DatabaseHelper::serverStartUpUserLoad
+/// \return
 ///
-/// This will be only called once during the server's start up
-/// in order to load the list of users and messages. This makes
-/// the server more efficient for it doesn't need to call queries
-/// everytime to load messages and data. The user will then only need
-/// to insert and update.
-void DatabaseHelper::serverStartupLoad(QMap<int, QString> userMap,
-                                       QMap<int, MailMessage *> mailMap)
+QMap<QString, QString> DatabaseHelper::serverStartUpUserLoad()
 {
     Q_ASSERT(getInitialized());
+
+    QMap<QString, QString> mapToReturn;
+    return mapToReturn;
+}
+
+///
+/// \brief DatabaseHelper::serverStartUpMailLoad
+/// \return
+///
+QMap<int, MailMessage *> DatabaseHelper::serverStartUpMailLoad()
+{
+    Q_ASSERT(getInitialized());
+
+    QMap<int, MailMessage *> mapToReturn;
+    return mapToReturn;
 }
 
 ///

@@ -16,6 +16,10 @@ Server::Server(QWidget *parent) : QDialog(parent), m_tcpServer(0), m_networkSess
     m_databaseHelper = new DatabaseHelper;
     m_databaseHelper->init();
 
+    // Load the QMaps from the database
+    m_mapOfUsers = m_databaseHelper->serverStartUpUserLoad();
+    m_mapOfMailMessages = m_databaseHelper->serverStartUpMailLoad();
+
     // Sets up GUI
     m_serverStatusLabel = new QLabel;
     m_quitButton = new QPushButton(tr("Quit"));

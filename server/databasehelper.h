@@ -19,8 +19,8 @@ public:
     ~DatabaseHelper();
 
 public:
-    void serverStartupLoad(QMap<int, QString> userMap,
-                           QMap<int, MailMessage *> mailMap);
+    QMap<QString, QString> serverStartUpUserLoad();
+    QMap<int, MailMessage *> serverStartUpMailLoad();
     bool deleteFromTable(int messageID);
     bool insertIntoTable(QString tableName, QString insertInfo);
     int getMailId(QString fromUser, QString toUser, QString subject, QString message);
