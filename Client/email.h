@@ -20,6 +20,7 @@ public:
     QString getTo();
     QString getFrom();
     QString getMessage();
+    int getID();
 
 
 private:

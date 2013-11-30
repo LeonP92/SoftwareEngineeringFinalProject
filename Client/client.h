@@ -35,6 +35,7 @@ public:
     void loadMainUI();
 
 protected slots:
+public Q_SLOTS:
     //Login window
     void enableStartConnectionButton();
     void startConnection();
@@ -43,7 +44,7 @@ protected slots:
     void login();
 
     //Main client view
-    void viewMessage();
+    void viewMessage(QListWidgetItem* item);
     void newMessage();
     void deleteMessage();
     void viewSentMessages();
@@ -76,7 +77,7 @@ private:
     QLabel *m_subjectLabel;
     QLabel *m_bodyLabel;
     QLabel *m_statusLabel;
-    QListView *m_inbox;
+    QListWidget *m_inbox;
     QLineEdit *m_toFromEdit;
     QLineEdit *m_subjectEdit;
     QTextEdit *m_bodyEdit;

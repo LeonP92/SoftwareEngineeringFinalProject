@@ -30,19 +30,19 @@ static const uint qt_meta_data_Client[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-       8,    7,    7,    7, 0x09,
-      38,    7,    7,    7, 0x09,
-      56,    7,    7,    7, 0x09,
-      72,    7,    7,    7, 0x09,
-      87,    7,    7,    7, 0x09,
-      95,    7,    7,    7, 0x09,
-     109,    7,    7,    7, 0x09,
-     122,    7,    7,    7, 0x09,
-     138,    7,    7,    7, 0x09,
-     157,    7,    7,    7, 0x09,
-     171,    7,    7,    7, 0x09,
-     191,  179,    7,    7, 0x09,
-     234,    7,    7,    7, 0x09,
+       8,    7,    7,    7, 0x0a,
+      38,    7,    7,    7, 0x0a,
+      56,    7,    7,    7, 0x0a,
+      72,    7,    7,    7, 0x0a,
+      87,    7,    7,    7, 0x0a,
+     100,   95,    7,    7, 0x0a,
+     130,    7,    7,    7, 0x0a,
+     143,    7,    7,    7, 0x0a,
+     159,    7,    7,    7, 0x0a,
+     178,    7,    7,    7, 0x0a,
+     192,    7,    7,    7, 0x0a,
+     212,  200,    7,    7, 0x0a,
+     255,    7,    7,    7, 0x0a,
 
        0        // eod
 };
@@ -50,7 +50,8 @@ static const uint qt_meta_data_Client[] = {
 static const char qt_meta_stringdata_Client[] = {
     "Client\0\0enableStartConnectionButton()\0"
     "startConnection()\0sessionOpened()\0"
-    "registerUser()\0login()\0viewMessage()\0"
+    "registerUser()\0login()\0item\0"
+    "viewMessage(QListWidgetItem*)\0"
     "newMessage()\0deleteMessage()\0"
     "viewSentMessages()\0sendMessage()\0"
     "reply()\0socketError\0"
@@ -69,7 +70,7 @@ void Client::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 2: _t->sessionOpened(); break;
         case 3: _t->registerUser(); break;
         case 4: _t->login(); break;
-        case 5: _t->viewMessage(); break;
+        case 5: _t->viewMessage((*reinterpret_cast< QListWidgetItem*(*)>(_a[1]))); break;
         case 6: _t->newMessage(); break;
         case 7: _t->deleteMessage(); break;
         case 8: _t->viewSentMessages(); break;
