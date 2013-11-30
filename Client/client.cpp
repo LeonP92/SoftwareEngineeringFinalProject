@@ -1,5 +1,5 @@
 
-#include <QtGui>
+
 #include <QtNetwork>
 
 #include "client.h"
@@ -59,18 +59,19 @@ Client::Client(QWidget *parent)
                 this, SLOT(displayError(QAbstractSocket::SocketError)));
 
     // put widgets on a window
-    QGridLayout *loginLayout = new QGridLayout;
-    loginLayout->addWidget(m_hostLabel, 0, 0);
-    loginLayout->addWidget(m_hostEdit, 0, 1);
-    loginLayout->addWidget(m_portLabel, 1, 0);
-    loginLayout->addWidget(m_portEdit, 1, 1);
-    loginLayout->addWidget(m_userLabel, 2, 0);
-    loginLayout->addWidget(m_userEdit, 2, 1);
-    loginLayout->addWidget(m_passwordLabel, 3, 0);
-    loginLayout->addWidget(m_passwordEdit, 3, 1);
-    loginLayout->addWidget(m_loginStatusLabel, 4, 0, 1, 2);
-    loginLayout->addWidget(buttonBox, 5, 0, 1, 2);
-    setLayout(loginLayout);
+    //QGridLayout *loginLayout = new QGridLayout;
+
+    loginLayout.addWidget(m_hostLabel, 0, 0);
+    loginLayout.addWidget(m_hostEdit, 0, 1);
+    loginLayout.addWidget(m_portLabel, 1, 0);
+    loginLayout.addWidget(m_portEdit, 1, 1);
+    loginLayout.addWidget(m_userLabel, 2, 0);
+    loginLayout.addWidget(m_userEdit, 2, 1);
+    loginLayout.addWidget(m_passwordLabel, 3, 0);
+    loginLayout.addWidget(m_passwordEdit, 3, 1);
+    loginLayout.addWidget(m_loginStatusLabel, 4, 0, 1, 2);
+    loginLayout.addWidget(buttonBox, 5, 0, 1, 2);
+    setLayout(&loginLayout);
 }
 
 ///
@@ -137,8 +138,56 @@ void Client::loadMainUI()
         listWidget->addItem(item);
 
     }
+    qDebug() << "yo im heere";
+    //remove all the old widgets
+    loginLayout.removeWidget(m_hostLabel);
+    loginLayout.removeWidget(m_hostEdit);
+    loginLayout.removeWidget(m_portLabel);
+    loginLayout.removeWidget(m_portEdit);
+    loginLayout.removeWidget(m_userLabel);
+    loginLayout.removeWidget(m_userEdit);
+    loginLayout.removeWidget(m_passwordLabel);
+    loginLayout.removeWidget(m_passwordEdit);
+    loginLayout.removeWidget(m_loginStatusLabel);
+    loginLayout.removeWidget(buttonBox);
 
-    listWidget->show();
+    //create and add the new stuff
+    m_toFromLabel = new QLabel(tr("To:"));
+    m_subjectLabel = new QLabel(tr("Subject:"));
+    m_bodyLabel = new QLabel(tr("Body:"));
+    m_toFromEdit = new QLineEdit();
+    m_subjectEdit = new QLineEdit();
+    m_bodyEdit = new QTextEdit();
+
+    m_view = new QPushButton(tr("View"));
+    m_new = new QPushButton(tr("New"));
+    m_delete = new QPushButton(tr("Delete"));
+    m_viewSent = new QPushButton(tr("Sent"));
+    m_send = new QPushButton(tr("Send"));
+    m_reply = new QPushButton(tr("reply"));
+
+    belowButtonBox = new QDialogButtonBox;
+    belowButtonBox->addButton(m_reply, QDialogButtonBox::ActionRole);
+    belowButtonBox->addButton(m_send, QDialogButtonBox::ActionRole);
+
+    aboveButtonBox = new QDialogButtonBox;
+    aboveButtonBox->addButton(m_view, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_new, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_delete, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_viewSent, QDialogButtonBox::ActionRole);
+
+    loginLayout.addWidget(listWidget, 0, 0, 7, 1);
+    loginLayout.addWidget(aboveButtonBox, 0, 1, 1, 4);
+    loginLayout.addWidget(m_toFromLabel, 1, 1);
+    loginLayout.addWidget(m_toFromEdit, 2, 1);
+    loginLayout.addWidget(m_subjectLabel, 3, 1);
+    loginLayout.addWidget(m_subjectEdit, 4, 1);
+    loginLayout.addWidget(m_bodyLabel, 5, 1);
+    loginLayout.addWidget(m_bodyEdit, 6, 1);
+
+
+    setLayout(&loginLayout);
+
 }
 
 ///
