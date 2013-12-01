@@ -193,6 +193,7 @@ void Server::newUserRegistration(int clientNumber, QString userName, QString pas
         if (m_databaseHelper->insertIntoTable("user", information)){
             qDebug() << "Inserting new user was a success!";
 
+            m_mapOfUsers.insert(userName.toUpper(), password);
             serverReply = QString::number(clientNumber) +
                     " {:} SUCCESS {:} New user, " + userName + ", was created sucessfully!";
         }else{
@@ -281,7 +282,7 @@ void Server::deleteEmail(int clientNumber, int id)
     QString serverReply;
 
     if (m_databaseHelper->deleteFromTable(id)){
-        MailMessage *emailToDelete = m_mapOfMailMessages[id];
+        MailMessage *emailToDelete = m_mapOfMailMessages.take(id);
         qDebug() << "Email with the subject: " + emailToDelete->getEmailSubject();
 
         serverReply = QString::number(clientNumber) +
