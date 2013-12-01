@@ -173,6 +173,9 @@ void Server::cleanUp(int clientNumber)
                 QString("%1").arg(clientNumber) + ", has been deleted.";
 
     m_mapOfClientConnections.take(clientNumber);
+
+    m_mapOfThreads[clientNumber]->exit(0);
+    delete m_mapOfThreads[clientNumber];
     m_mapOfThreads.take(clientNumber);
 
 }
@@ -193,6 +196,7 @@ void Server::newUserRegistration(int clientNumber, QString userName, QString pas
         if (m_databaseHelper->insertIntoTable("user", information)){
             qDebug() << "Inserting new user was a success!";
 
+            m_mapOfUsers.insert(userName.toUpper(), password);
             serverReply = QString::number(clientNumber) +
                     " {:} SUCCESS {:} New user, " + userName + ", was created sucessfully!";
         }else{
@@ -281,7 +285,7 @@ void Server::deleteEmail(int clientNumber, int id)
     QString serverReply;
 
     if (m_databaseHelper->deleteFromTable(id)){
-        MailMessage *emailToDelete = m_mapOfMailMessages[id];
+        MailMessage *emailToDelete = m_mapOfMailMessages.take(id);
         qDebug() << "Email with the subject: " + emailToDelete->getEmailSubject();
 
         serverReply = QString::number(clientNumber) +
@@ -342,5 +346,15 @@ void Server::getUserSentMail(int clientNumber, QString userName)
 /// The destructor for the server. Will clean up any lose connections and clean up pointers.
 Server::~Server()
 {
+    foreach (clientHandlerPointer client, m_mapOfClientConnections)
+        delete client;
+    m_mapOfClientConnections.clear();
+
+    foreach (MailMessage *mail, m_mapOfMailMessages)
+        delete mail;
+    m_mapOfMailMessages.clear();
+
+    delete m_databaseHelper;
+    m_databaseHelper = NULL;
 
 }

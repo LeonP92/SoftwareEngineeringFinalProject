@@ -1,6 +1,7 @@
 #include "databasehelper.h"
 #include <QDebug>
 #include <QSqlQuery>
+#include <QMutex>
 
 ///
 /// \brief DatabaseHelper::DatabaseHelper
@@ -55,7 +56,7 @@ void DatabaseHelper::init()
                               "(id integer UNIQUE primary key, "
                               "FromUser integer REFERENCES user(id), "
                               "ToUser integer REFERENCES user(id), "
-                              "Subject varchar(20), "
+                              "Subject varchar(50), "
                               "Message varchar, "
                               "BeenRead BOOLEAN DEFAULT 0)"))
                 qDebug() << "Mail Message table created successfully!";
@@ -67,17 +68,35 @@ void DatabaseHelper::init()
         qDebug() << "Error opening the database. Please restart the server.";
     }
 
+    // For safety practices.
+    serverStartUpUserLoad();
 }
 
 ///
 /// \brief DatabaseHelper::serverStartUpUserLoad
 /// \return
 ///
+/// Loads all users. Should be used before anything
 QMap<QString, QString> DatabaseHelper::serverStartUpUserLoad()
 {
     Q_ASSERT(getInitialized());
 
     QMap<QString, QString> mapToReturn;
+
+    QSqlQuery sqlQuery;
+    QString query = "SELECT id, Username, Password FROM user";
+    while (sqlQuery.exec(query) && sqlQuery.next()){
+        int userId = sqlQuery.value(0).toInt();
+        QString userName = sqlQuery.value(1).toString();
+        QString userPassword = sqlQuery.value(2).toString();
+
+        if (!m_mapOfUserIds.contains(userName.toUpper())){
+            m_mapOfUsers.insert(userId, userName.toUpper());
+            m_mapOfUserIds.insert(userName.toUpper(), userId);
+        }
+        mapToReturn.insert(userName.toUpper(), userPassword);
+    }
+
     return mapToReturn;
 }
 
@@ -90,6 +109,24 @@ QMap<int, MailMessage *> DatabaseHelper::serverStartUpMailLoad()
     Q_ASSERT(getInitialized());
 
     QMap<int, MailMessage *> mapToReturn;
+
+    QSqlQuery sqlQuery;
+    QString query = "SELECT id, FromUser, ToUser, Subject, Message, BeenRead FROM user";
+
+    while (sqlQuery.exec(query) && sqlQuery.next()){
+        int mailId = sqlQuery.value(0).toInt();
+        QString fromUser = m_mapOfUsers[sqlQuery.value(1).toInt()];
+        QString toUser = m_mapOfUsers[sqlQuery.value(2).toInt()];
+        QString Subject = sqlQuery.value(3).toString();
+        QString Message = sqlQuery.value(4).toString();
+        bool hasBeenRead = sqlQuery.value(5).toInt() == 1;
+
+        MailMessage *loadedMail = new MailMessage(mailId, fromUser, toUser,
+                                                 Subject, Message, hasBeenRead);
+
+        mapToReturn.insert(mailId, loadedMail);
+    }
+
     return mapToReturn;
 }
 
@@ -127,12 +164,36 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 {
     Q_ASSERT(getInitialized());
 
+    QSqlQuery sqlQuery;
+
     if (tableName == "user"){
+        QStringList information = insertInfo.split(" {:} ");
 
+        if (sqlQuery.exec(QString("INSERT INTO user values(NULL, '%1', '%2')").
+                          arg(information[0]).arg(information[1]))){
+            qDebug() << "DATABASE: Inserting user information successful.";
+            return true;
+        }
+        else{
+            qDebug() << "DATABASE: Failure to insert user.";
+            return false;
+        }
     }else if (tableName == "mail"){
+        QStringList information = insertInfo.split(" {:} ");
+        int fromUserId = m_mapOfUserIds[information[0].toUpper()];
+        int toUserId = m_mapOfUserIds[information[1].toUpper()];
 
+        if (sqlQuery.exec(QString("INSERT INTO mail values(NULL, %1, %2, "
+                                  "%3, %4, 0)").arg(fromUserId).arg(toUserId).
+                          arg(information[2]).arg(information[3])))
+            return true;
+        else{
+            qDebug() << "DATABASE: Failure while inserting new mail.";
+            return false;
+        }
     }else
         qDebug() << "The table name, " + tableName + ", is an invalid table name.";
+    return false;
 }
 
 ///
@@ -145,6 +206,20 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 ///
 int DatabaseHelper::getMailId(QString fromUser, QString toUser, QString subject, QString message)
 {
+    Q_ASSERT(getInitialized());
+
+    QSqlQuery sqlQuery;
+    int mailId = 0;
+
+    if (sqlQuery.exec(QString("SELECT id FROM mail WHERE FromUser = '%1' AND ToUser = '%2' "
+                              "AND Subject = '%3' AND Message = '%3'").arg(fromUser).
+                      arg(toUser).arg(subject).arg(message))){
+        sqlQuery.next();
+        mailId = sqlQuery.value(0).toInt();
+    }else
+        qDebug() << "ERROR: Could not load mail ID. Return value is meaningless.";
+
+    return mailId;
 }
 
 ///
@@ -164,5 +239,7 @@ bool DatabaseHelper::getInitialized()
 /// all processes are completed.
 DatabaseHelper::~DatabaseHelper()
 {
-
+    m_database.close();
+    m_mapOfUserIds.clear();
+    m_mapOfUsers.clear();
 }
