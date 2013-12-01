@@ -107,3 +107,12 @@ QString Email::getMessage()
 {
     return m_message;
 }
+
+///
+/// \brief Email::getID
+/// \return
+/// returns m_id
+int Email::getID()
+{
+    return m_id;
+}

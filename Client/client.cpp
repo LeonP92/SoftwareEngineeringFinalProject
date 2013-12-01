@@ -1,5 +1,5 @@
 
-#include <QtGui>
+
 #include <QtNetwork>
 
 #include "client.h"
@@ -59,18 +59,44 @@ Client::Client(QWidget *parent)
                 this, SLOT(displayError(QAbstractSocket::SocketError)));
 
     // put widgets on a window
-    QGridLayout *loginLayout = new QGridLayout;
-    loginLayout->addWidget(m_hostLabel, 0, 0);
-    loginLayout->addWidget(m_hostEdit, 0, 1);
-    loginLayout->addWidget(m_portLabel, 1, 0);
-    loginLayout->addWidget(m_portEdit, 1, 1);
-    loginLayout->addWidget(m_userLabel, 2, 0);
-    loginLayout->addWidget(m_userEdit, 2, 1);
-    loginLayout->addWidget(m_passwordLabel, 3, 0);
-    loginLayout->addWidget(m_passwordEdit, 3, 1);
-    loginLayout->addWidget(m_loginStatusLabel, 4, 0, 1, 2);
-    loginLayout->addWidget(buttonBox, 5, 0, 1, 2);
-    setLayout(loginLayout);
+    //QGridLayout *loginLayout = new QGridLayout;
+
+    loginLayout.addWidget(m_hostLabel, 0, 0);
+    loginLayout.addWidget(m_hostEdit, 0, 1);
+    loginLayout.addWidget(m_portLabel, 1, 0);
+    loginLayout.addWidget(m_portEdit, 1, 1);
+    loginLayout.addWidget(m_userLabel, 2, 0);
+    loginLayout.addWidget(m_userEdit, 2, 1);
+    loginLayout.addWidget(m_passwordLabel, 3, 0);
+    loginLayout.addWidget(m_passwordEdit, 3, 1);
+    loginLayout.addWidget(m_loginStatusLabel, 4, 0, 1, 2);
+    loginLayout.addWidget(buttonBox, 5, 0, 1, 2);
+    setLayout(&loginLayout);
+
+
+    m_inbox = new QListWidget();
+    QObject::connect(m_inbox, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(viewMessage(QListWidgetItem*)));
+
+    // test code for setting up emails
+    Email* e1 = new Email();
+    e1->setFrom("John");
+    e1->setSubject("money");
+    e1->setMessage("Yo nigga, you betta give me my money!");
+    e1->setRead(false);
+    e1->setText(e1->getFrom() + " | " + e1->getSubject());
+    e1->setData(12, 1);
+    e1->setID(1);
+    Email* e2 = new Email();
+    e2->setFrom("Simon");
+    e2->setSubject("hangout");
+    e2->setMessage("Hey man, do you want to hangout?");
+    e2->setRead(false);
+    e2->setText(e2->getFrom() + " | " + e2->getSubject());
+    m_emails.append(e1);
+    m_emails.append(e2);
+    e2->setData(12, 2);
+    e2->setID(2);
+
 }
 
 ///
@@ -125,27 +151,104 @@ void Client::loadMainUI()
     m_toFromLabel = new QLabel(tr("To:"));
     m_subjectLabel = new QLabel(tr("Subject:"));
     m_statusLabel = new QLabel(tr("Viewing current inbox."));
-    m_inbox = new QListView;
+    //m_inbox = new QListView;
 
 
-    QListWidget * listWidget = new QListWidget();
-    listWidget->setStyleSheet("QListWidget::item{border-bottom:1px solid black;}");
-    for (int i=0; i<10; i++) {
-        Email * item = new Email();
-        item->setText("Test email "+QString::number(i));
-        item->setSizeHint(QSize(50, 40));
-        listWidget->addItem(item);
 
+    m_inbox->setStyleSheet("QListWidget::item{border-bottom:1px solid black;}");
+    for (int i=0; i<m_emails.length(); i++) {
+        m_emails[i]->setSizeHint(QSize(50, 40));
+        m_inbox->addItem(m_emails[i]);
     }
 
-    listWidget->show();
+
+
+    //remove all the old widgets
+    m_hostLabel->setVisible(false);
+    m_hostEdit->setEnabled(false);
+    m_hostEdit->setVisible(false);
+    m_portLabel->setVisible(false);
+    m_portEdit->setEnabled(false);
+    m_portEdit->setVisible(false);
+    m_userLabel->setVisible(false);
+    m_userEdit->setEnabled(false);
+    m_userEdit->setVisible(false);
+    m_passwordLabel->setVisible(false);
+    m_passwordEdit->setVisible(false);
+    m_passwordEdit->setEnabled(false);
+    m_loginStatusLabel->setVisible(false);
+    buttonBox->setVisible(false);
+    m_registerBtn->setEnabled(false);
+    m_registerBtn->setVisible(false);
+    m_loginBtn->setEnabled(false);
+    m_loginBtn->setVisible(false);
+    m_connectBtn->setEnabled(false);
+    m_connectBtn->setVisible(false);
+    loginLayout.removeWidget(m_hostLabel);
+    loginLayout.removeWidget(m_hostEdit);
+    loginLayout.removeWidget(m_portLabel);
+    loginLayout.removeWidget(m_portEdit);
+    loginLayout.removeWidget(m_userLabel);
+    loginLayout.removeWidget(m_userEdit);
+    loginLayout.removeWidget(m_passwordLabel);
+    loginLayout.removeWidget(m_passwordEdit);
+    loginLayout.removeWidget(m_loginStatusLabel);
+    loginLayout.removeWidget(buttonBox);
+
+    //create and add the new stuff
+    m_toFromLabel = new QLabel(tr("To:"));
+    m_subjectLabel = new QLabel(tr("Subject:"));
+    m_bodyLabel = new QLabel(tr("Body:"));
+    m_toFromEdit = new QLineEdit();
+    m_subjectEdit = new QLineEdit();
+    m_bodyEdit = new QTextEdit();
+
+    m_view = new QPushButton(tr("View"));
+    m_new = new QPushButton(tr("New"));
+    m_delete = new QPushButton(tr("Delete"));
+    m_viewSent = new QPushButton(tr("Sent"));
+    m_send = new QPushButton(tr("Send"));
+    m_reply = new QPushButton(tr("reply"));
+
+    belowButtonBox = new QDialogButtonBox;
+    belowButtonBox->addButton(m_reply, QDialogButtonBox::ActionRole);
+    belowButtonBox->addButton(m_send, QDialogButtonBox::ActionRole);
+
+    aboveButtonBox = new QDialogButtonBox;
+    aboveButtonBox->addButton(m_view, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_new, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_delete, QDialogButtonBox::ActionRole);
+    aboveButtonBox->addButton(m_viewSent, QDialogButtonBox::ActionRole);
+
+    loginLayout.addWidget(m_inbox, 0, 0, 8, 1);
+    loginLayout.addWidget(aboveButtonBox, 0, 1, 1, 4);
+    loginLayout.addWidget(m_toFromLabel, 1, 1);
+    loginLayout.addWidget(m_toFromEdit, 2, 1);
+    loginLayout.addWidget(m_subjectLabel, 3, 1);
+    loginLayout.addWidget(m_subjectEdit, 4, 1);
+    loginLayout.addWidget(m_bodyLabel, 5, 1);
+    loginLayout.addWidget(m_bodyEdit, 6, 1);
+    loginLayout.addWidget(belowButtonBox, 7, 1, 1, 2);
+
+
+    setLayout(&loginLayout);
+
 }
 
 ///
 /// \brief Client::viewMessage
 /// loads message data into the message viewing objects
-void Client::viewMessage()
+void Client::viewMessage(QListWidgetItem* item)
 {
+    int checkID = item->data(12).toInt();
+    for (int i=0; i<m_emails.length(); i++) {
+        if (m_emails[i]->getID() == checkID) {
+            m_toFromEdit->setText(m_emails[i]->getFrom());
+            m_subjectEdit->setText(m_emails[i]->getSubject());
+            m_bodyEdit->setText(m_emails[i]->getMessage());
+        }
+        qDebug() << "item got clicked: " + item->data(12).toString();
+    }
 
 }
 

@@ -10,6 +10,7 @@
 #define CLIENT_H
 
 #include <QDialog>
+#include <QtGui>
 #include <QTcpSocket>
 #include "email.h"
 
@@ -34,6 +35,7 @@ public:
     void loadMainUI();
 
 protected slots:
+public Q_SLOTS:
     //Login window
     void enableStartConnectionButton();
     void startConnection();
@@ -42,7 +44,7 @@ protected slots:
     void login();
 
     //Main client view
-    void viewMessage();
+    void viewMessage(QListWidgetItem* item);
     void newMessage();
     void deleteMessage();
     void viewSentMessages();
@@ -55,6 +57,7 @@ protected slots:
 
 private:
     //Login window variables
+    QGridLayout loginLayout;
     QLabel *m_userLabel;
     QLabel *m_passwordLabel;
     QLabel *m_hostLabel;
@@ -72,8 +75,12 @@ private:
     QLabel *m_currentUser;
     QLabel *m_toFromLabel;
     QLabel *m_subjectLabel;
+    QLabel *m_bodyLabel;
     QLabel *m_statusLabel;
-    QListView *m_inbox;
+    QListWidget *m_inbox;
+    QLineEdit *m_toFromEdit;
+    QLineEdit *m_subjectEdit;
+    QTextEdit *m_bodyEdit;
     QPushButton *m_view;
     QPushButton *m_new;
     QPushButton *m_delete;
@@ -81,6 +88,8 @@ private:
     QPushButton *m_send;
     QPushButton *m_reply;
     QDialogButtonBox *buttonBox;
+    QDialogButtonBox *belowButtonBox;
+    QDialogButtonBox *aboveButtonBox;
 
     QList <Email*> m_emails;
     QList <Email*> m_sentMail;
