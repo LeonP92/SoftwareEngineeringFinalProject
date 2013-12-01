@@ -53,7 +53,9 @@ Client::Client(QWidget *parent)
     connect(m_connectBtn, SIGNAL(clicked()), this, SLOT(startConnection()));
     connect(m_registerBtn, SIGNAL(clicked()), this, SLOT(registerUser()));
     connect(m_loginBtn, SIGNAL(clicked()), this, SLOT(login()));
+
     // read from server when server sends data
+    m_tcpSocket = new QTcpSocket(this);
     connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(readServerResponse()));
     connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
                 this, SLOT(displayError(QAbstractSocket::SocketError)));
@@ -73,9 +75,12 @@ Client::Client(QWidget *parent)
     loginLayout.addWidget(buttonBox, 5, 0, 1, 2);
     setLayout(&loginLayout);
 
-
+    // set up the inbox
     m_inbox = new QListWidget();
     QObject::connect(m_inbox, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(viewMessage(QListWidgetItem*)));
+    m_inbox->setStyleSheet("QListWidget::item{border-bottom:1px solid black;}");
+
+    m_viewingSent = 0;
 
     // test code for setting up emails
     Email* e1 = new Email();
@@ -112,7 +117,8 @@ void Client::enableStartConnectionButton()
 /// and the server through a tcpsocket object.
 void Client::startConnection()
 {
-
+    m_tcpSocket->connectToHost(m_hostEdit->text(),
+                                 portLineEdit->text().toInt());
 }
 
 ///
@@ -151,17 +157,11 @@ void Client::loadMainUI()
     m_toFromLabel = new QLabel(tr("To:"));
     m_subjectLabel = new QLabel(tr("Subject:"));
     m_statusLabel = new QLabel(tr("Viewing current inbox."));
-    //m_inbox = new QListView;
 
-
-
-    m_inbox->setStyleSheet("QListWidget::item{border-bottom:1px solid black;}");
     for (int i=0; i<m_emails.length(); i++) {
         m_emails[i]->setSizeHint(QSize(50, 40));
         m_inbox->addItem(m_emails[i]);
     }
-
-
 
     //remove all the old widgets
     m_hostLabel->setVisible(false);
@@ -203,7 +203,6 @@ void Client::loadMainUI()
     m_subjectEdit = new QLineEdit();
     m_bodyEdit = new QTextEdit();
 
-    m_view = new QPushButton(tr("View"));
     m_new = new QPushButton(tr("New"));
     m_delete = new QPushButton(tr("Delete"));
     m_viewSent = new QPushButton(tr("Sent"));
@@ -215,10 +214,14 @@ void Client::loadMainUI()
     belowButtonBox->addButton(m_send, QDialogButtonBox::ActionRole);
 
     aboveButtonBox = new QDialogButtonBox;
-    aboveButtonBox->addButton(m_view, QDialogButtonBox::ActionRole);
     aboveButtonBox->addButton(m_new, QDialogButtonBox::ActionRole);
     aboveButtonBox->addButton(m_delete, QDialogButtonBox::ActionRole);
     aboveButtonBox->addButton(m_viewSent, QDialogButtonBox::ActionRole);
+
+    connect(m_new, SIGNAL(clicked()), this, SLOT(newMessage()));
+    connect(m_delete, SIGNAL(clicked()), this, SLOT(deleteMessage()));
+    connect(m_viewSent, SIGNAL(clicked()), this, SLOT(viewSentMessages()));
+    connect(m_reply, SIGNAL(clicked()), this, SLOT(reply()));
 
     loginLayout.addWidget(m_inbox, 0, 0, 8, 1);
     loginLayout.addWidget(aboveButtonBox, 0, 1, 1, 4);
@@ -240,16 +243,21 @@ void Client::loadMainUI()
 /// loads message data into the message viewing objects
 void Client::viewMessage(QListWidgetItem* item)
 {
-    int checkID = item->data(12).toInt();
+    m_toFromLabel->setText("From:");
+    m_delete->setEnabled(true);
+    m_selectedEmailID = item->data(12).toInt();
     for (int i=0; i<m_emails.length(); i++) {
-        if (m_emails[i]->getID() == checkID) {
+        if (m_emails[i]->getID() == m_selectedEmailID) {
             m_toFromEdit->setText(m_emails[i]->getFrom());
             m_subjectEdit->setText(m_emails[i]->getSubject());
             m_bodyEdit->setText(m_emails[i]->getMessage());
         }
-        qDebug() << "item got clicked: " + item->data(12).toString();
     }
-
+    m_toFromEdit->setReadOnly(true);
+    m_subjectEdit->setReadOnly(true);
+    m_bodyEdit->setReadOnly(true);
+    m_send->setEnabled(false);
+    m_reply->setEnabled(true);
 }
 
 ///
@@ -258,7 +266,16 @@ void Client::viewMessage(QListWidgetItem* item)
 /// user to fill in all the fields and enables send button
 void Client::newMessage()
 {
-
+    m_toFromLabel->setText("To:");
+    m_delete->setEnabled(false);
+    m_toFromEdit->setText("");
+    m_toFromEdit->setReadOnly(false);
+    m_subjectEdit->setText("");
+    m_subjectEdit->setReadOnly(false);
+    m_bodyEdit->setText("");
+    m_bodyEdit->setReadOnly(false);
+    m_reply->setEnabled(false);
+    m_send->setEnabled(true);
 }
 
 ///
@@ -267,7 +284,19 @@ void Client::newMessage()
 /// tells the server to remove from database
 void Client::deleteMessage()
 {
+    int removeIndex;
+    for (int i=0; i<m_emails.length(); i++) {
+        if (m_emails[i]->getID() == m_selectedEmailID) {
+            m_inbox->removeItemWidget(m_emails[i]);
+            delete m_emails[i];
+            removeIndex = i;
+        }
+    }
+    m_emails.removeAt(removeIndex);
 
+    refreshInbox("inbox");
+
+    //send to server to delete email by id
 }
 
 ///
@@ -283,7 +312,8 @@ void Client::viewSentMessages()
 /// sends the message to the server to be stored
 void Client::sendMessage()
 {
-
+    refreshInbox();
+    // push message to socket
 }
 
 ///
@@ -292,7 +322,41 @@ void Client::sendMessage()
 /// user to edit and send a new message
 void Client::reply()
 {
+    m_toFromLabel->setText("To:");
+    m_delete->setEnabled(false);
+    m_toFromEdit->setReadOnly(false);
+    m_subjectEdit->setText("");
+    m_subjectEdit->setReadOnly(false);
+    m_bodyEdit->setText("");
+    m_bodyEdit->setReadOnly(false);
+    m_reply->setEnabled(false);
+    m_send->setEnabled(true);
 
+}
+
+///
+/// \brief Client::refreshInbox
+/// refreshes the inbox
+void Client::refreshInbox(QString wanted)
+{
+    for (int i=0; i<m_emails.length(); i++) {
+        m_inbox->removeItemWidget(m_emails[i]);
+    }
+    for (int i=0; i<m_sentMail.length(); i++) {
+        m_inbox->removeItemWidget(m_sentMail[i]);
+    }
+    if (wanted == "sent") {
+        for (int j=0; j<m_sentMail.length(); j++) {
+            m_sentMail[j]->setSizeHint(QSize(50, 40));
+            m_inbox->addItem(m_sentMail[j]);
+        }
+    }
+    else {
+        for (int j=0; j<m_emails.length(); j++) {
+            m_emails[j]->setSizeHint(QSize(50, 40));
+            m_inbox->addItem(m_emails[j]);
+        }
+    }
 }
 
 ///

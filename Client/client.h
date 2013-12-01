@@ -33,6 +33,7 @@ class Client : public QDialog
 public:
     Client(QWidget *parent = 0);
     void loadMainUI();
+    void refreshInbox(QString wanted);
 
 protected slots:
 public Q_SLOTS:
@@ -93,6 +94,8 @@ private:
 
     QList <Email*> m_emails;
     QList <Email*> m_sentMail;
+    int m_selectedEmailID;
+    bool m_viewingSent;
 
     QString m_user;
     QString m_password;
