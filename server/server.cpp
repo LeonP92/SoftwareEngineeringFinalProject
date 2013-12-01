@@ -173,6 +173,9 @@ void Server::cleanUp(int clientNumber)
                 QString("%1").arg(clientNumber) + ", has been deleted.";
 
     m_mapOfClientConnections.take(clientNumber);
+
+    m_mapOfThreads[clientNumber]->exit(0);
+    delete m_mapOfThreads[clientNumber];
     m_mapOfThreads.take(clientNumber);
 
 }
@@ -343,5 +346,15 @@ void Server::getUserSentMail(int clientNumber, QString userName)
 /// The destructor for the server. Will clean up any lose connections and clean up pointers.
 Server::~Server()
 {
+    foreach (clientHandlerPointer client, m_mapOfClientConnections)
+        delete client;
+    m_mapOfClientConnections.clear();
+
+    foreach (MailMessage *mail, m_mapOfMailMessages)
+        delete mail;
+    m_mapOfMailMessages.clear();
+
+    delete m_databaseHelper;
+    m_databaseHelper = NULL;
 
 }

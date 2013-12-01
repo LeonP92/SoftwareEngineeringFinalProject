@@ -239,5 +239,7 @@ bool DatabaseHelper::getInitialized()
 /// all processes are completed.
 DatabaseHelper::~DatabaseHelper()
 {
-
+    m_database.close();
+    m_mapOfUserIds.clear();
+    m_mapOfUsers.clear();
 }
