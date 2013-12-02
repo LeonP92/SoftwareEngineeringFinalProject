@@ -141,12 +141,16 @@ bool DatabaseHelper::deleteFromTable(int messageID)
 {
     Q_ASSERT(getInitialized());
 
+    QMutex mutex;
     QSqlQuery sqlQuery;
 
+    mutex.lock();
     if (sqlQuery.exec(QString("DELETE FROM mail WHERE id = %1").arg(messageID))){
+        mutex.unlock();
         qDebug() << "Email deleted properly from the database.";
         return true;
     }else{
+        mutex.unlock();
         qDebug() << sqlQuery.lastError();
         return false;
     }
@@ -165,6 +169,7 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 {
     Q_ASSERT(getInitialized());
 
+    QMutex mutex;
     QSqlQuery sqlQuery;
 
     if (tableName == "user"){
@@ -172,8 +177,10 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
         QString userName = sqlQuery.value(0).toString();
 
         if (!m_mapOfUserIds.contains(userName.toUpper())){
+            mutex.lock();
             if (sqlQuery.exec(QString("INSERT INTO user values(NULL, '%1', '%2')").
                               arg(information[0].toUpper()).arg(information[1]))){
+                mutex.unlock();
                 qDebug() << "DATABASE: Inserting user information successful.";
 
                 // Add inserting user run query to find user's int and then put it into the map
@@ -190,6 +197,7 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 
                 return true;
              }else{
+                mutex.unlock();
                 qDebug() << "DATABASE: Failure to insert user.";
                 return false;
             }
@@ -202,11 +210,15 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
         int fromUserId = m_mapOfUserIds[information[0].toUpper()];
         int toUserId = m_mapOfUserIds[information[1].toUpper()];
 
+        mutex.lock();
         if (sqlQuery.exec(QString("INSERT INTO mail values(NULL, %1, %2, "
                                   "%3, %4, 0)").arg(fromUserId).arg(toUserId).
-                          arg(information[2]).arg(information[3])))
+                          arg(information[2]).arg(information[3]))){
+            mutex.unlock();
             return true;
+        }
         else{
+            mutex.unlock();
             qDebug() << "DATABASE: Failure while inserting new mail.";
             return false;
         }
