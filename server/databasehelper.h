@@ -18,6 +18,10 @@ public:
     void init();
     ~DatabaseHelper();
 
+    // Test functions
+    QSqlDatabase getDatabase();
+    QMap<QString, int> getMapOfUserIds();
+
 public:
     QMap<QString, QString> serverStartUpUserLoad();
     QMap<int, MailMessage *> serverStartUpMailLoad();

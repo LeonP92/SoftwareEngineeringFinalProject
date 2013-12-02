@@ -85,15 +85,15 @@ QMap<QString, QString> DatabaseHelper::serverStartUpUserLoad()
 
     QSqlQuery sqlQuery;
     QString query = "SELECT id, Username, Password FROM user";
-    while (sqlQuery.exec(query) && sqlQuery.next()){
+    bool isQuerySuccess = sqlQuery.exec(query);
+
+    while (isQuerySuccess && sqlQuery.next()){
         int userId = sqlQuery.value(0).toInt();
         QString userName = sqlQuery.value(1).toString();
         QString userPassword = sqlQuery.value(2).toString();
 
-        if (!m_mapOfUserIds.contains(userName.toUpper())){
-            m_mapOfUsers.insert(userId, userName.toUpper());
-            m_mapOfUserIds.insert(userName.toUpper(), userId);
-        }
+        m_mapOfUsers.insert(userId, userName.toUpper());
+        m_mapOfUserIds.insert(userName.toUpper(), userId);
         mapToReturn.insert(userName.toUpper(), userPassword);
     }
 
@@ -112,8 +112,9 @@ QMap<int, MailMessage *> DatabaseHelper::serverStartUpMailLoad()
 
     QSqlQuery sqlQuery;
     QString query = "SELECT id, FromUser, ToUser, Subject, Message, BeenRead FROM user";
+    bool isQuerySuccessful = sqlQuery.exec(query) ;
 
-    while (sqlQuery.exec(query) && sqlQuery.next()){
+    while (isQuerySuccessful && sqlQuery.next()){
         int mailId = sqlQuery.value(0).toInt();
         QString fromUser = m_mapOfUsers[sqlQuery.value(1).toInt()];
         QString toUser = m_mapOfUsers[sqlQuery.value(2).toInt()];
@@ -168,14 +169,32 @@ bool DatabaseHelper::insertIntoTable(QString tableName, QString insertInfo)
 
     if (tableName == "user"){
         QStringList information = insertInfo.split(" {:} ");
+        QString userName = sqlQuery.value(0).toString();
 
-        if (sqlQuery.exec(QString("INSERT INTO user values(NULL, '%1', '%2')").
-                          arg(information[0]).arg(information[1]))){
-            qDebug() << "DATABASE: Inserting user information successful.";
-            return true;
-        }
-        else{
-            qDebug() << "DATABASE: Failure to insert user.";
+        if (!m_mapOfUserIds.contains(userName.toUpper())){
+            if (sqlQuery.exec(QString("INSERT INTO user values(NULL, '%1', '%2')").
+                              arg(information[0].toUpper()).arg(information[1]))){
+                qDebug() << "DATABASE: Inserting user information successful.";
+
+                // Add inserting user run query to find user's int and then put it into the map
+                QSqlQuery sqlQuery;
+                QString query = "SELECT id FROM user WHERE Username = '"
+                        + userName.toUpper() + "'";
+
+                if (sqlQuery.exec(query)){
+                    int userId = sqlQuery.value(0).toInt();
+
+                    m_mapOfUsers.insert(userId, userName.toUpper());
+                    m_mapOfUserIds.insert(userName.toUpper(), userId);
+                }
+
+                return true;
+             }else{
+                qDebug() << "DATABASE: Failure to insert user.";
+                return false;
+            }
+        }else{
+            qDebug() << "DATABASE: User already exists";
             return false;
         }
     }else if (tableName == "mail"){
@@ -230,6 +249,26 @@ int DatabaseHelper::getMailId(QString fromUser, QString toUser, QString subject,
 bool DatabaseHelper::getInitialized()
 {
     return m_isInitialized;
+}
+
+///
+/// \brief DatabaseHelper::getDatabase
+/// \return QSqlDatabase
+///
+/// Used in testing to make sure database is created
+QSqlDatabase DatabaseHelper::getDatabase()
+{
+    return m_database;
+}
+
+///
+/// \brief DatabaseHelper::getDatabase
+/// \return QSqlDatabase
+///
+/// Used in testing to make sure database is created
+QMap<QString, int> DatabaseHelper::getMapOfUserIds()
+{
+    return m_mapOfUserIds;
 }
 
 ///
