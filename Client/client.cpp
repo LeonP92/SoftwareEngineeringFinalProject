@@ -118,7 +118,7 @@ void Client::enableStartConnectionButton()
 void Client::startConnection()
 {
     m_tcpSocket->connectToHost(m_hostEdit->text(),
-                                 portLineEdit->text().toInt());
+                                 m_portEdit->text().toInt());
 }
 
 ///
@@ -312,7 +312,7 @@ void Client::viewSentMessages()
 /// sends the message to the server to be stored
 void Client::sendMessage()
 {
-    refreshInbox();
+    refreshInbox("inbox");
     // push message to socket
 }
 
@@ -374,6 +374,24 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 void Client::readServerResponse()
 {
     // if server says login successfull, load new UI
+
+}
+
+///
+/// \brief Client::handleServerResponse
+/// \param servResponse
+/// performs action based on servResponse
+void Client::handleServerResponse(QString servResponse)
+{
+
+}
+
+///
+/// \brief Client::sendToServer
+/// \param command
+/// sends 'command' to the server
+void Client::sendToServer(QString command)
+{
 
 }
 

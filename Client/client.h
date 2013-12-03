@@ -34,6 +34,8 @@ public:
     Client(QWidget *parent = 0);
     void loadMainUI();
     void refreshInbox(QString wanted);
+    void sendToServer(QString command);
+    void handleServerResponse(QString servResponse);
 
 protected slots:
 public Q_SLOTS:
