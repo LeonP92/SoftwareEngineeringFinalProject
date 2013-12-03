@@ -374,6 +374,18 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 void Client::readServerResponse()
 {
     // if server says login successfull, load new UI
+    QDataStream in(m_tcpSocket);
+    in.setVersion(QDataStream::Qt_4_0);
+    if (m_blockSize == 0) {
+        if (m_tcpSocket->bytesAvailable() < (int)sizeof(quint16))
+            return;
+        in >> m_blockSize;
+    }
+    if (m_tcpSocket->bytesAvailable() < m_blockSize)
+        return;
+    QString servResponse;
+    in >> servResponse;
+    qDebug() << "server says: " + servResponse;
 
 }
 
