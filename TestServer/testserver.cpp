@@ -41,7 +41,6 @@ void TestServer::sendCommand(QString commandString, QTcpSocket* tcpSocket,
     tcpSocket->write(dataBlock);
     tcpSocket->waitForBytesWritten(3000);
     QTest::qWait(100);
-    qApp->processEvents();
 }
 
 void TestServer::testConstructor()
