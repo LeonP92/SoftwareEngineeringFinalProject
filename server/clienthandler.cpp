@@ -67,6 +67,7 @@ void ClientHandler::readClientData()
         inData >> clientCommand;
         // Analyze Command will decipher what the command wants the server to do
         analyzeCommand(clientCommand);
+        m_blockSize = 0;
     }
 }
 
@@ -91,7 +92,6 @@ void ClientHandler::sendDataToClient(QString response)
         outputStream.device()->seek(0);
         outputStream << (quint16)(dataBlock.size() - sizeof(quint16));
         m_clientConnection->write(dataBlock);
-	m_blockSize = 0;
     }
 }
 
