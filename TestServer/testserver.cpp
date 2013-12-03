@@ -1,5 +1,10 @@
-#include "server.h"
+/*
+ * Leon Pham
+ * December 2, 2013
+ * Test class for the Server
+ */
 
+#include "server.h"
 #include <QtTest/QTest>
 #include <QtGui>
 #include <QTestEventList>
@@ -28,6 +33,13 @@ private slots:
     void testMessageReceived();
 };
 
+///
+/// \brief TestServer::sendCommand
+/// \param commandString
+/// \param tcpSocket
+/// \param dataBlock
+///
+/// Used in the test class to send commands to the server
 void TestServer::sendCommand(QString commandString, QTcpSocket* tcpSocket,
                              QByteArray dataBlock)
 {
@@ -43,6 +55,10 @@ void TestServer::sendCommand(QString commandString, QTcpSocket* tcpSocket,
     QTest::qWait(100);
 }
 
+///
+/// \brief TestServer::testConstructor
+///
+/// Tests to make sure the database helper member variable is correctly created
 void TestServer::testConstructor()
 {
     QWidget *parent = new QWidget;
@@ -57,6 +73,10 @@ void TestServer::testConstructor()
     QVERIFY(validDatabase == true);
 }
 
+///
+/// \brief TestServer::testClientMap_data
+///
+/// Tests to make sure clients handler are created properly
 void TestServer::testClientMap_data()
 {
     QTest::addColumn<Server*>("server");
@@ -68,6 +88,7 @@ void TestServer::testClientMap_data()
 
     QTest::newRow("test no clients") << server << 0;
 
+    // Will have 4 cases, 0, 5, 10, 15 clients
     Server *server1 = new Server(parent);
     int serverPort = server1->getServerPort();
 
@@ -108,6 +129,10 @@ void TestServer::testClientMap()
     QVERIFY(server->getClientMap().size() == sizeOfClientMap);
 }
 
+///
+/// \brief TestServer::testClientConnection_data
+///
+/// Tests to make sure the number of client is actually correct
 void TestServer::testClientConnection_data()
 {
     QTest::addColumn<Server*>("testServer");
@@ -160,6 +185,10 @@ void TestServer::testClientConnection()
     QVERIFY(testServer->getNumberOfClients() == numberOfClients);
 }
 
+///
+/// \brief TestServer::testMessageReceived
+///
+/// Tests sending commands to the server to make sure every command is interpretted correctly
 void TestServer::testMessageReceived()
 {
     QTest::addColumn<Server*>("server");

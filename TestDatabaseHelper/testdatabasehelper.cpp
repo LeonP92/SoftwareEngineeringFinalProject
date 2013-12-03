@@ -1,5 +1,11 @@
-#include "databasehelper.h"
+/*
+ * Leon Pham
+ * December 2, 2013
+ * Database Helper Test Class
+ *
+ */
 
+#include "databasehelper.h"
 #include <QtTest/QTest>
 #include <QtGui>
 #include <QTestEventList>
@@ -18,6 +24,10 @@ private slots:
     void testDeleteFromTable();
 };
 
+///
+/// \brief TestDatabaseHelper::testInit_data
+///
+/// Tests the database init to make sure that it sucessfully opened the database
 void TestDatabaseHelper::testInit_data()
 {
     QTest::addColumn<bool>("hasDatabase");
@@ -40,13 +50,17 @@ void TestDatabaseHelper::testInit()
     QVERIFY(hasDatabase == databaseStatus);
 }
 
+///
+/// \brief TestDatabaseHelper::testInsertUserIntoTable
+///
+/// Tests to make sure that the database can insert users to the users table
 void TestDatabaseHelper::testInsertUserIntoTable()
 {
     DatabaseHelper *database = new DatabaseHelper;
     database->init();
     database->serverStartUpUserLoad();
 
-    QString user = "benboomz";
+    QString user = "RickRoll";
     QString password = "password";
     QString data = user + " {:} " + password;
 
@@ -69,13 +83,17 @@ void TestDatabaseHelper::testInsertUserIntoTable()
     QVERIFY(user2Id != -1);
 }
 
+///
+/// \brief TestDatabaseHelper::testInsertMailIntoTable
+///
+/// Makes sure the database can insert mail into the mail table
 void TestDatabaseHelper::testInsertMailIntoTable()
 {
     DatabaseHelper *database = new DatabaseHelper;
     database->init();
     database->serverStartUpUserLoad();
 
-    QString fromUser = "benboomz";
+    QString fromUser = "RickRoll";
     QString toUser = "PatrickStar";
     QString subject = "How are you?";
     QString message = "Just wanted to check up on you.";
@@ -91,13 +109,18 @@ void TestDatabaseHelper::testInsertMailIntoTable()
     QVERIFY(mailId != -1);
 }
 
+///
+/// \brief TestDatabaseHelper::testDeleteFromTable
+///
+/// Makes sure the database can delete from the mail table, users table
+/// will never be deleted
 void TestDatabaseHelper::testDeleteFromTable()
 {
     DatabaseHelper *database = new DatabaseHelper;
     database->init();
     database->serverStartUpUserLoad();
 
-    QString fromUser = "benboomz";
+    QString fromUser = "RickRoll";
     QString toUser = "PatrickStar";
     QString subject = "Let's hang out on Friday";
     QString message = "Try to come to the park on Friday so we can have fun!";
