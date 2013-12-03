@@ -91,6 +91,7 @@ void ClientHandler::sendDataToClient(QString response)
         outputStream.device()->seek(0);
         outputStream << (quint16)(dataBlock.size() - sizeof(quint16));
         m_clientConnection->write(dataBlock);
+	m_blockSize = 0;
     }
 }
 
