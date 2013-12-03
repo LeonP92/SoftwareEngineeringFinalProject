@@ -10,7 +10,7 @@
 /// It will also make the initial connections for buttons and labels, as well as set up
 /// network settings and configurations.
 Server::Server(QWidget *parent) : QDialog(parent), m_tcpServer(0), m_networkSession(0),
-    m_nextClientNumber(0)
+    m_nextClientNumber(0), m_numberOfMessagesReceived(0)
 {
     // Create a database
     m_databaseHelper = new DatabaseHelper;
@@ -210,7 +210,8 @@ void Server::newUserRegistration(int clientNumber, QString userName, QString pas
                 " {:} ERROR {:} The username " + userName + " already exists.";
     }
 
-    emit serverResponse(serverReply);
+    m_numberOfMessagesReceived += 1;
+    //emit serverResponse(serverReply);
 }
 
 ///
@@ -236,7 +237,8 @@ void Server::validateUserAccount(int clientNumber, QString userName, QString pas
         serverReply = QString::number(clientNumber) + " {:} ERROR {:} Invalid username.";
     }
 
-    emit serverResponse(serverReply);
+    m_numberOfMessagesReceived += 1;
+    //emit serverResponse(serverReply);
 }
 
 ///
@@ -271,7 +273,8 @@ void Server::sendEmail(int clientNumber, QString fromUser, QString toUser,
         qDebug() << "ERROR: Inserting the mail into the database was unsuccessful.";
     }
 
-    emit serverResponse(serverReply);
+    m_numberOfMessagesReceived += 1;
+    //emit serverResponse(serverReply);
 }
 
 ///
@@ -298,13 +301,11 @@ void Server::deleteEmail(int clientNumber, int id)
                     " {:} ERROR {:} Email could not be deleted!";
         }
     } else {
-        serverReply = QString::number(clientNumber) +
-                " {:} ERROR {:} Mail does not exist!";
+        serverReply = QString::number(clientNumber) + " {:} ERROR {:} Mail does not exist!";
     }
 
     m_numberOfMessagesReceived += 1;
-
-    emit serverResponse(serverReply);
+    //emit serverResponse(serverReply);
 }
 
 ///
@@ -322,9 +323,12 @@ void Server::getUserInbox(int clientNumber, QString userName)
                     QString::number(mail->getMailId()) +
                     " {:} " + mail->getEmailSubject() + " {:} " + mail->getFromUser() +
                     " {:} " + mail->getMailMessage();
-            emit serverResponse(serverReply);
+
+            //emit serverResponse(serverReply);
         }
     }
+
+    m_numberOfMessagesReceived += 1;
 }
 
 ///
@@ -342,9 +346,35 @@ void Server::getUserSentMail(int clientNumber, QString userName)
                     QString::number(mail->getMailId()) +
                     " {:} " + mail->getEmailSubject() + " {:} " + mail->getToUser() +
                     " {:} " + mail->getMailMessage();
-            emit serverResponse(serverReply);
+            //emit serverResponse(serverReply);
         }
     }
+    m_numberOfMessagesReceived += 1;
+}
+
+bool Server::isDatabaseValid() const
+{
+    return m_databaseHelper->getDatabase().isOpen();
+}
+
+int Server::getServerPort() const
+{
+    return m_tcpServer->serverPort();
+}
+
+int Server::getNumberOfClients() const
+{
+    return m_nextClientNumber;
+}
+
+QMap<int, clientHandlerPointer> Server::getClientMap() const
+{
+    return m_mapOfClientConnections;
+}
+
+int Server::getNumberOfCommandsReceived() const
+{
+    return m_numberOfMessagesReceived;
 }
 
 ///
