@@ -150,8 +150,8 @@ void Server::handleClientRequest()
                      this, SLOT(getUserInbox(int, QString)));
     QObject::connect(newClientHandler, SIGNAL(userSentMailRequest(int, QString)),
                      this, SLOT(getUserSentMail(int, QString)));
-    QObject::connect(this, SIGNAL(serverResponse(int, QString)),
-                     newClientHandler, SLOT(sendDataToClient(int, QString)));
+    QObject::connect(this, SIGNAL(serverResponse(QString)),
+                     newClientHandler, SLOT(sendDataToClient(QString)));
 
     newThread->start();
 
